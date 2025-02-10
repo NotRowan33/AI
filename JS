@@ -1,0 +1,8 @@
+import OpenAI from "openai";
+
+const openai = new OpenAI();
+const submitButton = document.getElementById("submitButton");
+const userInput = document.getElementById("userInput");
+const responseDiv = document.getElementById("response");
+
+submitButton.addEventListener("click
