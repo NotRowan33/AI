@@ -1,4 +1,4 @@
-const API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct";
+const API_URL = "https://api-inference.huggingface.co/models/gpt2"; // Using GPT-2 as an alternative
 const API_KEY = "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"; // Make sure to use your Hugging Face API key
 
 async function sendMessage() {
