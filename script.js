@@ -1,4 +1,7 @@
-function sendMessage() {
+const API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct";
+const API_KEY = "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"; // Replace with your Hugging Face API key
+
+async function sendMessage() {
     let userInput = document.getElementById("user-input").value;
     let chatBox = document.getElementById("chat-box");
 
@@ -8,21 +11,30 @@ function sendMessage() {
     let userMessage = `<div><strong>You:</strong> ${userInput}</div>`;
     chatBox.innerHTML += userMessage;
 
-    // Simulated AI response
-    let aiResponses = {
-        "hello": "Hi! How can I help you study today?",
-        "what is physics": "Physics is the study of matter, energy, and the interactions between them.",
-        "who are you": "I'm your AI study assistant, here to help you learn!",
-        "default": "I'm not sure, but I can try to help!"
-    };
+    // Call AI API for a response
+    let aiMessage = `<div><strong>AI:</strong> Thinking...</div>`;
+    chatBox.innerHTML += aiMessage;
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-    let response = aiResponses[userInput.toLowerCase()] || aiResponses["default"];
-    let aiMessage = `<div><strong>AI:</strong> ${response}</div>`;
+    try {
+        let response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ inputs: userInput })
+        });
 
-    setTimeout(() => {
-        chatBox.innerHTML += aiMessage;
+        let result = await response.json();
+        let aiResponse = result[0]?.generated_text || "Sorry, I couldn't understand that.";
+
+        // Update AI response in chat
+        chatBox.innerHTML = chatBox.innerHTML.replace("Thinking...", aiResponse);
         chatBox.scrollTop = chatBox.scrollHeight;
-    }, 500);
+    } catch (error) {
+        chatBox.innerHTML += `<div><strong>AI:</strong> Error fetching response. Please try again.</div>`;
+    }
 
     document.getElementById("user-input").value = "";
 }
