@@ -1,5 +1,5 @@
 const API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct";
-const API_KEY = "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"; // Replace with your Hugging Face API key
+const API_KEY = "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"; // Make sure to use your Hugging Face API key
 
 async function sendMessage() {
     let userInput = document.getElementById("user-input").value;
@@ -23,17 +23,26 @@ async function sendMessage() {
                 "Authorization": `Bearer ${API_KEY}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ inputs: userInput })
+            body: JSON.stringify({
+                inputs: userInput,
+                options: { use_cache: false }
+            })
         });
 
         let result = await response.json();
-        let aiResponse = result[0]?.generated_text || "Sorry, I couldn't understand that.";
-
+        if (result.error) {
+            aiMessage = `<div><strong>AI:</strong> Error: ${result.error}</div>`;
+        } else {
+            let aiResponse = result[0]?.generated_text || "Sorry, I couldn't understand that.";
+            aiMessage = `<div><strong>AI:</strong> ${aiResponse}</div>`;
+        }
+        
         // Update AI response in chat
-        chatBox.innerHTML = chatBox.innerHTML.replace("Thinking...", aiResponse);
+        chatBox.innerHTML = chatBox.innerHTML.replace("Thinking...", aiMessage);
         chatBox.scrollTop = chatBox.scrollHeight;
     } catch (error) {
-        chatBox.innerHTML += `<div><strong>AI:</strong> Error fetching response. Please try again.</div>`;
+        aiMessage = `<div><strong>AI:</strong> Error: Unable to reach the server. Please try again later.</div>`;
+        chatBox.innerHTML = chatBox.innerHTML.replace("Thinking...", aiMessage);
     }
 
     document.getElementById("user-input").value = "";
