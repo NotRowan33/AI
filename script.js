@@ -1,5 +1,5 @@
-const API_URL = "https://api-inference.huggingface.co/models/gpt2"; // Using GPT-2 as an alternative
-const API_KEY = "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"; // Make sure to use your Hugging Face API key
+const API_URL = "https://api-inference.huggingface.co/models/openai-community/gpt2";
+const API_KEY = "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"; // Replace with your Hugging Face API key
 
 async function sendMessage() {
     let userInput = document.getElementById("user-input").value;
@@ -7,13 +7,8 @@ async function sendMessage() {
 
     if (userInput.trim() === "") return;
 
-    // Display user message
-    let userMessage = `<div><strong>You:</strong> ${userInput}</div>`;
-    chatBox.innerHTML += userMessage;
-
-    // Call AI API for a response
-    let aiMessage = `<div><strong>AI:</strong> Thinking...</div>`;
-    chatBox.innerHTML += aiMessage;
+    chatBox.innerHTML += `<div><strong>You:</strong> ${userInput}</div>`;
+    chatBox.innerHTML += `<div><strong>AI:</strong> Thinking...</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
@@ -23,26 +18,21 @@ async function sendMessage() {
                 "Authorization": `Bearer ${API_KEY}`,
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-                inputs: userInput,
-                options: { use_cache: false }
-            })
+            body: JSON.stringify({ inputs: userInput })
         });
 
         let result = await response.json();
+
         if (result.error) {
-            aiMessage = `<div><strong>AI:</strong> Error: ${result.error}</div>`;
+            chatBox.innerHTML += `<div><strong>AI:</strong> Error: ${result.error}</div>`;
         } else {
-            let aiResponse = result[0]?.generated_text || "Sorry, I couldn't understand that.";
-            aiMessage = `<div><strong>AI:</strong> ${aiResponse}</div>`;
+            let aiResponse = result.generated_text || "I couldn't process that.";
+            chatBox.innerHTML = chatBox.innerHTML.replace("Thinking...", `<div><strong>AI:</strong> ${aiResponse}</div>`);
         }
-        
-        // Update AI response in chat
-        chatBox.innerHTML = chatBox.innerHTML.replace("Thinking...", aiMessage);
+
         chatBox.scrollTop = chatBox.scrollHeight;
     } catch (error) {
-        aiMessage = `<div><strong>AI:</strong> Error: Unable to reach the server. Please try again later.</div>`;
-        chatBox.innerHTML = chatBox.innerHTML.replace("Thinking...", aiMessage);
+        chatBox.innerHTML += `<div><strong>AI:</strong> Error: Unable to reach the server.</div>`;
     }
 
     document.getElementById("user-input").value = "";
